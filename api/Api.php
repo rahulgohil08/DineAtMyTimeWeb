@@ -31,7 +31,7 @@ if (isset($_GET['apicall'])) {
 
     switch ($_GET['apicall']) {
 
-        /*---------------------------------------------------------------------------------------------------------------------*/
+        /*-------------------------------------------Customer Registration--------------------------------------------------------------------------*/
 
         case 'cust_register':
             isTheseParametersAvailable(array('cust_name', 'cust_email', 'cust_password', 'cust_contact', 'cust_address'));
@@ -57,7 +57,7 @@ if (isset($_GET['apicall'])) {
 
             break;
 
-        /*---------------------------------------------------------------------------------------------------------------------*/
+        /*--------------------------------------------------Customer Login----------------------------------------------------------------*/
 
         case 'cust_login':
 
@@ -76,7 +76,7 @@ if (isset($_GET['apicall'])) {
 
             break;
 
-        /*---------------------------------------------------------------------------------------------------------------------*/
+        /*----------------------------------------------------Restaurant Registration-----------------------------------------------------------------*/
 
         case 'res_register':
 
@@ -106,7 +106,7 @@ if (isset($_GET['apicall'])) {
 
             break;
 
-        /*---------------------------------------------------------------------------------------------------------------------*/
+        /*------------------------------------------------Restaurant Login---------------------------------------------------------------------*/
 
         case 'res_login':
             isTheseParametersAvailable(array('res_email', 'res_password'));
@@ -128,7 +128,7 @@ if (isset($_GET['apicall'])) {
         /*----------------------------------------------- GET Restaurant List---------------------------------------------------*/
 
 
-            case 'get_restaurant_list':
+        case 'get_restaurant_list':
 
 
             $db = new DbOperation();
@@ -140,7 +140,90 @@ if (isset($_GET['apicall'])) {
             break;
 
 
-        /*---------------------------------------------------------------------------------------------------------------------*/
+        /*----------------------------------------------- GET Restaurant List---------------------------------------------------*/
+
+
+        case 'get_restaurant_details':
+
+            isTheseParametersAvailable(array('res_id'));
+
+            $db = new DbOperation();
+
+            $response['error'] = false;
+            $response['restaurants'] = $db->getRestaurantDetails($_POST['res_id']);
+
+
+            break;
+
+
+        /*----------------------------------------------- GET Restaurant Menus---------------------------------------------------*/
+
+
+        case 'get_restaurant_menus':
+
+            isTheseParametersAvailable(array('res_id'));
+
+            $db = new DbOperation();
+
+            $response['error'] = false;
+            $response['menu'] = $db->getRestaurantMenus($_POST['res_id']);
+
+
+            break;
+
+
+        /*----------------------------------------------- GET Restaurant Tables---------------------------------------------------*/
+
+
+        case 'get_restaurant_tables':
+
+            isTheseParametersAvailable(array('res_id'));
+
+            $db = new DbOperation();
+
+            $response['error'] = false;
+            $response['table'] = $db->getRestaurantTables($_POST['res_id']);
+
+
+            break;
+
+
+        /*----------------------------------------------- Place Order ---------------------------------------------------*/
+
+
+        case 'place_order':
+
+            isTheseParametersAvailable(array('res_id', 'cust_id', 'menu', 'table_id','amount'));
+
+            $db = new DbOperation();
+            $result = $db->PlaceOrder(
+                $_POST['res_id'],
+                $_POST['cust_id'],
+                $_POST['menu'],
+                $_POST['table_id'],
+                $_POST['amount']
+            );
+
+            if ($result == 0) {
+
+                $response['error'] = false;
+                $response['message'] = 'Booking successfully';
+
+            } else if ($result == 2) {
+
+                $response['error'] = true;
+                $response['message'] = 'This Table is already Booked';
+
+            } else {
+
+                $response['error'] = true;
+                $response['message'] = 'Some error occurred please try again';
+            }
+
+            break;
+
+
+        /*---------------------------------------------Admin Login------------------------------------------------------------------------*/
 
         case 'admin_login':
             isTheseParametersAvailable(array('admin_email', 'admin_password'));
@@ -158,7 +241,7 @@ if (isset($_GET['apicall'])) {
 
             break;
 
-        /*---------------------------------------------------------------------------------------------------------------------*/
+        /*-----------------------------------------------Manage Order----------------------------------------------------------------------*/
 
         case 'manageOrder':
             isTheseParametersAvailable(array('Customer_id', 'Res_T_id', 'Res_id', 'Order_items', 'Order_type', 'Order_status', 'Order_bill', 'Payment_status'));
@@ -187,7 +270,7 @@ if (isset($_GET['apicall'])) {
             break;
 
 
-        /*---------------------------------------------------------------------------------------------------------------------*/
+        /*-----------------------------------------------Manage Offers----------------------------------------------------------------------*/
 
         case 'manageOffers':
             isTheseParametersAvailable(array('Promo_code', 'Res_id', 'Offer_details', 'status'));
@@ -210,6 +293,132 @@ if (isset($_GET['apicall'])) {
 
             break;
 
+        /*-----------------------------------------------------Table Layout----------------------------------------------------------------*/
+
+        case 'table_layout':
+            isTheseParametersAvailable(array('res_id', 'layout_name', 'status', 'no_of_seats'));
+            $db = new DbOperation();
+
+            $result = $db->tableLayout(
+                $_POST['res_id'],
+                $_POST['layout_name'],
+                $_POST['status'],
+                $_POST['no_of_seats']
+            );
+
+            if ($result == "inserted") {
+                $response['error'] = false;
+                $response['message'] = 'Layout Info inserted successfully';
+            } else if ($result == "updated") {
+                $response['error'] = false;
+                $response['message'] = 'Updated Successfuly';
+            } else {
+                $response['error'] = true;
+                $response['message'] = 'Already available';
+            }
+
+            break;
+
+        /*-----------------------------------------------------Table List----------------------------------------------------------------*/
+
+        case 'table_list':
+            $db = new DbOperation();
+
+            $response['error'] = false;
+            $response['message'] = $db->getTableList();
+
+            break;
+
+        /*----------------------------------------------------Menu Items-----------------------------------------------------------------*/
+        case 'menu_items':
+
+            isTheseParametersAvailable(array('res_id', 'item_name', 'price', 'item_image'));
+
+            $db = new DbOperation();
+
+            $result = $db->menuItems(
+                $_POST['res_id'],
+                $_POST['item_name'],
+                $_POST['price'],
+                $_POST['item_image']
+            );
+
+            if ($result == "inserted") {
+                $response['error'] = false;
+                $response['message'] = 'Item inserted successfully';
+            } else if ($result == "updated") {
+                $response['error'] = false;
+                $response['message'] = 'Item info updated successfully';
+            } else {
+                $response['error'] = true;
+                $response['message'] = 'Already inserted';
+            }
+
+
+            break;
+
+        /*-----------------------------------------------------MenuItems List----------------------------------------------------------------*/
+
+        case 'menu_items_list':
+            $db = new DbOperation();
+
+            $response['error'] = false;
+            $response['message'] = $db->getMenuItemsList();
+
+            break;
+        /*------------------------------------------------Feedback---------------------------------------------------------------------*/
+
+        case 'feedback':
+            isTheseParametersAvailable(array('res_id', 'customer_id', 'feedback_msg', 'feedback_reply'));
+            $db = new DbOperation();
+
+            $result = $db->feedback(
+                $_POST['res_id'],
+                $_POST['customer_id'],
+                $_POST['feedback_msg'],
+                $_POST['feedback_reply']
+            );
+
+            $response['error'] = false;
+            $response['message'] = 'Feedback sent successfully';
+
+            break;
+        /*----------------------------------------------------Customer Order History-----------------------------------------------------------------*/
+
+        case 'cust_history':
+            isTheseParametersAvailable(array('cust_email', 'cust_password'));
+            $db = new DbOperation();
+
+            $result = $db->Login($_POST['cust_email'], base64_encode($_POST['cust_password']));
+
+            if ($result) {
+                $response['error'] = false;
+                $response['message'] = 'List of Orders';
+                $response['user'] = $db->getCustOrderHistoryData($_POST['cust_email']);
+            } else {
+                $response['error'] = true;
+                $response['message'] = 'Invalid credentials';
+            }
+
+            break;
+        /*----------------------------------------------------Restaurant View Orders-----------------------------------------------------------------*/
+
+        case 'res_order':
+            isTheseParametersAvailable(array('res_email', 'res_password'));
+            $db = new DbOperation();
+
+            $result = $db->resLogin($_POST['res_email'], base64_encode($_POST['res_password']));
+
+            if ($result) {
+                $response['error'] = false;
+                $response['message'] = 'Order List';
+                $response['user'] = $db->getResOrderListData($_POST['res_email']);
+            } else {
+                $response['error'] = true;
+                $response['message'] = 'Invalid credentials';
+            }
+
+            break;
 
         default:
             # code...

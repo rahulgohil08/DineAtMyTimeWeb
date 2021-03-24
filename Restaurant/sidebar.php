@@ -14,6 +14,11 @@
                     <span id="menu">Manage Menu</span>
                 </a>
 
+                <a class="nav-link" href="manage-promo.php">
+                    <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
+                    <span id="pending">Manage Promo</span>
+                </a>
+
 
                 <a class="nav-link" href="manage-seats.php">
                     <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
@@ -25,6 +30,16 @@
                     <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
                     <span id="pending">Manage Order</span>
                 </a>
+
+
+                <a class="nav-link" href="manage-seat-map.php">
+                    <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
+                    <span id="pending">Manage Seat Map</span>
+                </a>
+
+
+
+
 
             </div>
 

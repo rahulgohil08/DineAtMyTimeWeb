@@ -9,6 +9,9 @@ class DbOperation
 
     function __construct()
     {
+        date_default_timezone_set('Asia/Kolkata');
+
+
         require_once dirname(__FILE__) . '/DbConnect.php';
         $db = new DbConnect();
         $this->con = $db->connect();
@@ -17,14 +20,18 @@ class DbOperation
     /*------------------------------------------------Place Order(entry in table)------------------------------------------------------------------------*/
 
 
-    function PlaceOrder($res_id, $cust_id, $menu, $table_id, $amount)
+    function PlaceOrder($res_id, $cust_id, $menu, $table_id, $discount, $amount, $datetime)
     {
+//        echo $datetime = date('Y-m-d H:i:s', strtotime("16-03-2021 17:45"));
 
-        if ($this->isAlreadySlot($res_id, $table_id)) {
+        $datetime = date('Y-m-d H:i:s', strtotime($datetime));
+
+        if ($this->isAlreadySlot($res_id, $table_id, $datetime)) {
             return 2;
         }
 
-         $stmt = "INSERT INTO `order`(`res_id`, `table_id`, `menu`, `cust_id`, `amount`) VALUES($res_id, $cust_id, '$menu',$table_id,$amount)";
+
+        $stmt = "INSERT INTO `my_order`(`res_id`, `table_id`, `menu`, `cust_id`, `discount`, `amount`,`booking_date_time`) VALUES($res_id, $table_id, '$menu',$cust_id,$discount,$amount,'$datetime')";
         $data2 = mysqli_query($this->con, $stmt);
 
         if ($data2) {
@@ -35,16 +42,52 @@ class DbOperation
     }
 
 
-    /*---------------------------------- Is Already Booked?  ---------------------------------------------------*/
+    /*---------------------------------- GET Booking Data ---------------------------------------------------*/
 
-    private function isAlreadySlot($res_id, $table_id)
+    function getBookingHistory($cust_id)
     {
 
-        $query = "SELECT order_id FROM `order` where res_id = $res_id and table_id = $table_id and is_expired = 0 and date(created_at) = date(now())";
+
+        $stmt = "SELECT my_order.order_id,my_order.menu,my_order.amount,my_order.booking_date_time,user.cust_name,my_table.table_no,restaurant_registration.res_name FROM `my_order` JOIN restaurant_registration USING (res_id) JOIN customer_registration as user USING(cust_id) JOIN my_table USING(table_id) where my_order.cust_id = $cust_id order by my_order.booking_date_time desc";
+        $data = mysqli_query($this->con, $stmt);
+
+        $outer = array();
+
+        while ($row = $data->fetch_assoc()) {
+            $outer[] = $row;
+        }
+
+        return $outer;
+    }
+
+    /*---------------------------------- Is Already Booked?  ---------------------------------------------------*/
+
+    public function isAlreadySlot($res_id, $table_id, $datetime)
+    {
+
+
+// SELECT booking_date_time - INTERVAL 30 MINUTE as backward,booking_date_time,booking_date_time + INTERVAL 30 MINUTE as forward FROM `my_order`
+
+//        SELECT * FROM `my_order` where res_id = 1 and table_id = 1 and is_expired = 0 and (booking_date_time - INTERVAL 15 MINUTE) <= now() and (booking_date_time + INTERVAL 15 MINUTE) >= now()
+//        SELECT * FROM `my_order` where res_id = 1 and table_id = 1 and is_expired = 0 and now()>=(booking_date_time - INTERVAL 15 MINUTE) and now()<= (booking_date_time + INTERVAL 15 MINUTE)
+//        $query = "SELECT order_id,booking_date_time FROM `my_order` where res_id = $res_id and table_id = $table_id and is_expired = 0 and date(created_at) = date(now())";
+
+//        SELECT * FROM `my_order` where res_id = 1 and table_id = 1 and is_expired = 0 and DATE("2021-03-23 17:45:00") = DATE(booking_date_time) and "2021-03-23 17:45:00">= (booking_date_time-INTERVAL 30 MINUTE) and "2021-03-23 17:45:00"<= (booking_date_time+INTERVAL 30 MINUTE)
+
+        $query = "SELECT * FROM `my_order` where res_id = $res_id and table_id = $table_id and is_expired = 0 and  booking_date_time BETWEEN '$datetime'-INTERVAL 30 MINUTE and '$datetime'+INTERVAL 30 MINUTE";
         $stmt = mysqli_query($this->con, $query);
+
         $num = mysqli_num_rows($stmt);
 
         return $num > 0;
+
+
+        //  15:15
+        // 15:00 --  15:30   -- 14:00
+        //  15:45
+        //
+
+
     }
 
     /*-------------------------------------------------Manage Offers(entry in table)-----------------------------------------------------------------------*/
@@ -147,9 +190,20 @@ class DbOperation
     /*----------------------------------------------------Restaurant List ----------------------------------------------------------*/
 
 
-    function getRestaurantList()
+    function getRestaurantList($cust_id)
     {
-        $stmt = "select * from `restaurant_registration`";
+
+        if ($this->isBookingAvailable($cust_id)) {
+
+            $mData = implode(',', $this->getRestaurantListByML($cust_id));
+            $stmt = "select * from `restaurant_registration` ORDER BY FIND_IN_SET(res_id, '$mData') DESC";
+
+        } else {
+
+            $stmt = "select * from `restaurant_registration`";
+        }
+
+
         $data = mysqli_query($this->con, $stmt);
 
         $restaurants = array();
@@ -165,8 +219,83 @@ class DbOperation
             array_push($restaurants, $restaurant);
 
         }
+
+
+//        if ($this->isBookingAvailable($cust_id)) {
+//
+//            $res_ids = $this->getRestaurantListByML($cust_id);
+//            /*echo implode(',', $res_ids);
+//            echo "\n";*/
+//
+//            foreach ($restaurants as $key => $data) {
+//
+//                if (in_array($data['res_id'], $res_ids)) {
+//
+//                    foreach ($res_ids as $k => $v) {
+//                        if ($data['res_id'] == $v && $k < count($res_ids) - 1) {
+//                            $restaurants = $this->moveElement($restaurants, $k, $key);
+//                        }
+//                    }
+//
+//                }
+//
+//            }
+//        }
+
         return $restaurants;
     }
+
+
+    private function moveElement(&$array, $a, $b)
+    {
+        $p1 = array_splice($array, $a, 1);
+        $p2 = array_splice($array, 0, $b);
+        return array_merge($p2, $p1, $array);
+    }
+
+    /*---------------------------------------------------- Is Booking Available ----------------------------------------------------------*/
+
+
+    private function isBookingAvailable($cust_id)
+    {
+
+        $stmt = "select order_id from `my_order` where cust_id = $cust_id";
+        $data = mysqli_query($this->con, $stmt);
+        $num = mysqli_num_rows($data);
+
+        return $num > 0;
+    }
+
+
+    /*------------------------------------------- Restaurant List Machine Learning----------------------------------------------------------*/
+
+
+    function getRestaurantListByML($cust_id)
+    {
+
+        $stmt = "SELECT DISTINCT(res_id) FROM `my_order` where cust_id = $cust_id ORDER BY created_at DESC";
+        $data = mysqli_query($this->con, $stmt);
+
+        $res_ids = [];
+
+        while ($obj = $data->fetch_object()) {
+            $res_ids[] = $obj->res_id;
+        }
+
+        /*
+           $finale = array();
+
+           foreach ($res_ids as $key => $data) {
+               if (!empty($finale) && in_array($data, $finale)) {
+                   continue;
+               }
+               $finale[] = $data;
+           }*/
+
+
+        return $res_ids;
+    }
+
 
     /*----------------------------------------------------Restaurant Details ----------------------------------------------------------*/
 
@@ -204,12 +333,32 @@ class DbOperation
         return $menu;
     }
 
+    /*----------------------------------------------------Restaurant Offers ----------------------------------------------------------*/
+
+
+    function getOffers($resId)
+    {
+        $stmt = "SELECT * FROM `manage_offers` WHERE res_id = $resId and is_active = 1";
+        $data = mysqli_query($this->con, $stmt);
+
+        $offer = array();
+
+        while ($obj = $data->fetch_object()) {
+
+            $offer[] = $obj;
+
+        }
+        return $offer;
+    }
+
     /*----------------------------------------------------Restaurant Tables ----------------------------------------------------------*/
 
 
     function getRestaurantTables($resId)
     {
-        $stmt = "SELECT * FROM `table` where res_id = $resId";
+
+
+        $stmt = "SELECT * FROM `my_table` where res_id = $resId";
         $data = mysqli_query($this->con, $stmt);
 
         $table = array();

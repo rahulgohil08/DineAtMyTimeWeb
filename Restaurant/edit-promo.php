@@ -73,7 +73,7 @@ if (isset($_SESSION['res_id'])) {
 
                     <div class="card-header">
                         <i class="fas fa-table mr-1"></i>
-                        Edit Menu
+                        Edit Promo
                     </div>
                     <div class="card-body">
 
@@ -81,25 +81,34 @@ if (isset($_SESSION['res_id'])) {
                         <?php
 
 
-                        $get_menu_id = $_GET['menu'];
+                        $get_promo_id = $_GET['promo'];
 
-                        $get_menu_data = "SELECT * FROM menu where menu_id = $get_menu_id";
-                        $execute = $conn->query($get_menu_data);
+                        $get_promo_data = "SELECT * FROM manage_offers where offer_id = $get_promo_id";
+                        $execute = $conn->query($get_promo_data);
                         $fetch_data = $execute->fetch_object();
 
 
                         ?>
 
 
-                        <form method="post" action="edit-menu-2.php">
+                        <form method="post" action="edit-promo-2.php">
 
 
                             <div class="form-group">
 
-                                <input type="hidden" name="menu_id" value="<?php echo $fetch_data->menu_id ?>">
+                                <input type="hidden" name="offer_id" value="<?php echo $fetch_data->offer_id ?>">
 
-                                <label>Menu Name</label>
-                                <input type="text" name="menu_name" value="<?php echo $fetch_data->menu_name ?>"
+                                <label>Promo Code</label>
+                                <input type="text" name="promo_code" value="<?php echo $fetch_data->promo_code ?>"
+                                       class="form-control" required>
+                            </div>
+
+
+                            <div class="form-group" style="display: none">
+
+
+                                <label>Minimum Purchase</label>
+                                <input type="text" name="min_purchase" value="<?php echo $fetch_data->min_purchase ?>"
                                        class="form-control" required>
                             </div>
 
@@ -107,8 +116,8 @@ if (isset($_SESSION['res_id'])) {
                             <div class="form-group">
 
 
-                                <label>Menu Price</label>
-                                <input type="text" name="amount" value="<?php echo $fetch_data->amount ?>"
+                                <label>Discount Amount</label>
+                                <input type="text" name="discount" value="<?php echo $fetch_data->discount_amount ?>"
                                        class="form-control" required>
                             </div>
 

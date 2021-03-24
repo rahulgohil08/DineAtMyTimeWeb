@@ -43,6 +43,22 @@ if (isset($_GET['table'])) {
 }
 
 
+if (isset($_GET['promo'])) {
+
+    $promo = $_GET['promo'];
+
+    $query = "DELETE FROM manage_offers where offer_id = $promo";
+
+    $result = mysqli_query($conn, $query);
+
+    if ($result) {
+        header('location:manage-promo.php');
+    }
+
+
+}
+
+
 ?>
 
 <body>

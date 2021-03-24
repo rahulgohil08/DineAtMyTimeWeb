@@ -1,5 +1,6 @@
 <?php
 include "connection.php";
+include "../Helpers/MyStatusHelper.php";
 session_start();
 
 
@@ -20,16 +21,21 @@ if (isset($_POST['submit'])) {
     $pwd = $conn->real_escape_string($pwd);
 
 
-    $q = "SELECT * FROM restaurant_registration WHERE res_email='$username' and res_password='$pwd'";
+     $q = "SELECT * FROM restaurant_registration WHERE res_email='$username' and res_password='$pwd'";
     $data = mysqli_query($conn, $q);
     $result = mysqli_num_rows($data);
 
-
     if ($result == 1) {
 
-        $total = mysqli_fetch_assoc($data);
-        $_SESSION['res_id'] = $total['res_id'];
-        header("location:index.php");
+        $fetch = $data->fetch_object();
+
+        if ($fetch->status == MyStatusHelper::status['pending']) {
+            echo "<script>alert('Your Account is Pending');</script>";
+        } else {
+
+            $_SESSION['res_id'] = $fetch->res_id;
+            header("location:index.php");
+        }
 
 
     } else {
@@ -72,23 +78,31 @@ if (isset($_POST['submit'])) {
                                 <form method="post">
                                     <div class="form-group">
                                         <div class="form-label-group">
+                                            <label for="inputEmail">Email</label>
+
                                             <input type="text" name="username" id="inputEmail" class="form-control"
                                                    placeholder="Email address" required="required"
                                                    autofocus="autofocus">
-                                            <label for="inputEmail">Username</label>
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <div class="form-label-group">
+                                            <label for="inputPassword">Password</label>
+
                                             <input type="password" name="pwd" id="inputPassword" class="form-control"
                                                    placeholder="Password"
                                                    required="required">
-                                            <label for="inputPassword">Password</label>
                                         </div>
                                     </div>
 
                                     <button type="submit" name="submit" class="btn btn-primary btn-block">Login</button>
+
                                 </form>
+
+                                <div class="text-center mt-2">
+                                    <a href="register.php" class="text-center">Sign Up</a>
+
+                                </div>
 
 
                             </div>

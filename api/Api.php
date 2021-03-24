@@ -130,11 +130,12 @@ if (isset($_GET['apicall'])) {
 
         case 'get_restaurant_list':
 
+            isTheseParametersAvailable(array('cust_id'));
 
             $db = new DbOperation();
 
             $response['error'] = false;
-            $response['restaurants'] = $db->getRestaurantList();
+            $response['restaurants'] = $db->getRestaurantList($_POST['cust_id']);
 
 
             break;
@@ -150,11 +151,26 @@ if (isset($_GET['apicall'])) {
             $db = new DbOperation();
 
             $response['error'] = false;
-            $response['restaurants'] = $db->getRestaurantDetails($_POST['res_id']);
+            $response['restaurant'] = $db->getRestaurantDetails($_POST['res_id']);
 
 
             break;
 
+
+        /*----------------------------------------------- GET Restaurant List---------------------------------------------------*/
+
+
+        case 'get_offer_list':
+
+            isTheseParametersAvailable(array('res_id'));
+
+            $db = new DbOperation();
+
+            $response['error'] = false;
+            $response['offers'] = $db->getOffers($_POST['res_id']);
+
+
+            break;
 
         /*----------------------------------------------- GET Restaurant Menus---------------------------------------------------*/
 
@@ -166,7 +182,7 @@ if (isset($_GET['apicall'])) {
             $db = new DbOperation();
 
             $response['error'] = false;
-            $response['menu'] = $db->getRestaurantMenus($_POST['res_id']);
+            $response['menus'] = $db->getRestaurantMenus($_POST['res_id']);
 
 
             break;
@@ -182,8 +198,36 @@ if (isset($_GET['apicall'])) {
             $db = new DbOperation();
 
             $response['error'] = false;
-            $response['table'] = $db->getRestaurantTables($_POST['res_id']);
+            $response['tables'] = $db->getRestaurantTables($_POST['res_id']);
 
+
+            break;
+
+
+        /*----------------------------------------------- Is Already Slot? ---------------------------------------------------*/
+
+
+        case 'is_already_slot':
+
+            isTheseParametersAvailable(array('res_id', 'table_id', 'datetime'));
+
+            $db = new DbOperation();
+            $result = $db->isAlreadySlot(
+                $_POST['res_id'],
+                $_POST['table_id'],
+                date('Y-m-d H:i:s', strtotime($_POST['datetime']))
+            );
+
+
+            if ($result) {
+
+                $response['error'] = true;
+                $response['message'] = 'This Table is already Booked';
+
+            } else {
+                $response['error'] = false;
+                $response['message'] = 'Table Available';
+            }
 
             break;
 
@@ -193,7 +237,7 @@ if (isset($_GET['apicall'])) {
 
         case 'place_order':
 
-            isTheseParametersAvailable(array('res_id', 'cust_id', 'menu', 'table_id','amount'));
+            isTheseParametersAvailable(array('res_id', 'cust_id', 'menu', 'table_id', 'discount', 'amount', 'datetime'));
 
             $db = new DbOperation();
             $result = $db->PlaceOrder(
@@ -201,7 +245,9 @@ if (isset($_GET['apicall'])) {
                 $_POST['cust_id'],
                 $_POST['menu'],
                 $_POST['table_id'],
-                $_POST['amount']
+                $_POST['discount'],
+                $_POST['amount'],
+                $_POST['datetime']
             );
 
             if ($result == 0) {
@@ -219,6 +265,21 @@ if (isset($_GET['apicall'])) {
                 $response['error'] = true;
                 $response['message'] = 'Some error occurred please try again';
             }
+
+            break;
+
+
+        /*---------------------------------------- GET My Booking History-----------------------------------------------*/
+
+        case 'get_booking_history':
+
+            isTheseParametersAvailable(array('cust_id'));
+            $db = new DbOperation();
+
+            $response['error'] = false;
+            $response['message'] = "Data Fetched Successfully";
+            $response['bookings'] = $db->getBookingHistory($_POST['cust_id']);
+
 
             break;
 

@@ -13,8 +13,7 @@ if (isset($_SESSION['res_id'])) {
     $res_id = $_SESSION['res_id'];
 }
 
-$stmt = "SELECT my_order.order_id,my_order.menu,my_order.amount,my_order.booking_date_time,user.cust_name,my_table.table_no FROM `my_order` JOIN restaurant_registration USING (res_id) JOIN customer_registration as user USING(cust_id) JOIN my_table USING(table_id) where my_order.res_id = $res_id and my_order.is_expired = 0 and date(my_order.booking_date_time) = date(now())
- order by my_order.booking_date_time desc";
+$stmt = "SELECT my_order.order_id,my_order.menu,my_order.amount,my_order.booking_date_time,user.cust_name,my_table.table_no FROM `my_order` JOIN restaurant_registration USING (res_id) JOIN customer_registration as user USING(cust_id) JOIN my_table USING(table_id) where my_order.res_id = $res_id order by my_order.booking_date_time desc";
 $data = mysqli_query($conn, $stmt);
 // SELECT my_order.order_id,my_order.menu,my_order.amount,user.cust_name,my_table.table_no FROM `my_order` JOIN restaurant_registration USING (res_id) JOIN customer_registration as user USING(cust_id) JOIN my_table USING(table_id)
 ?>
@@ -71,15 +70,9 @@ $data = mysqli_query($conn, $stmt);
 
                 <div class="card mb-4">
 
-                    <div class="py-2 mr-5 d-flex justify-content-between">
-
-                        <a class="btn btn-primary ml-4" href="order-history.php">Order History </a>
-
-                    </div>
-
                     <div class="card-header">
                         <i class="fas fa-table mr-1"></i>
-                        Today's Orders
+                        All Orders
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -92,7 +85,6 @@ $data = mysqli_query($conn, $stmt);
                                     <th>Selected Menu</th>
                                     <th>Amount Paid</th>
                                     <th>Order Date</th>
-                                    <th>Action</th>
                                 </tr>
                                 </thead>
 
@@ -114,13 +106,6 @@ $data = mysqli_query($conn, $stmt);
                                         <td><?php echo $row['menu'] ?></td>
                                         <td>Rs. <?php echo $row['amount'] ?></td>
                                         <td><?php echo $row['booking_date_time'] ?></td>
-                                        <td>
-
-                                            <a href='edit.php?order=<?php echo $row["order_id"] ?>'
-                                               class='btn btn-success'
-                                               onclick='return fun()'>Make Seat Available</a>
-                                        </td>
-
 
                                     </tr>
 

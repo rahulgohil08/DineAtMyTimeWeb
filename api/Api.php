@@ -41,7 +41,7 @@ if (isset($_GET['apicall'])) {
             //$_POST['cust_id'],
                 $_POST['cust_name'],
                 $_POST['cust_email'],
-                base64_encode($_POST['cust_password']),
+                $_POST['cust_password'],
                 $_POST['cust_contact'],
                 $_POST['cust_address']
             // $_POST['registration_time']
@@ -63,7 +63,7 @@ if (isset($_GET['apicall'])) {
 
             isTheseParametersAvailable(array('cust_email', 'cust_password'));
             $db = new DbOperation();
-            $result = $db->Login($_POST['cust_email'], base64_encode($_POST['cust_password']));
+            $result = $db->Login($_POST['cust_email'], $_POST['cust_password']);
 
             if ($result) {
                 $response['error'] = false;
@@ -156,6 +156,103 @@ if (isset($_GET['apicall'])) {
 
             break;
 
+
+        /*----------------------------------------------- GET User Profile---------------------------------------------------*/
+
+
+        case 'get_user_profile':
+
+            isTheseParametersAvailable(array('cust_id'));
+
+            $db = new DbOperation();
+
+            $response['error'] = false;
+            $response['user'] = $db->getUserProfile($_POST['cust_id']);
+
+
+            break;
+
+
+        /*----------------------------------------------- Edit User Profile---------------------------------------------------*/
+
+
+        case 'edit_user_profile':
+
+            isTheseParametersAvailable(array('cust_id', 'cust_name', 'cust_address'));
+
+            $db = new DbOperation();
+
+
+            $result = $db->editUserProfile(
+                $_POST['cust_id'],
+                $_POST['cust_name'],
+                $_POST['cust_address']
+            );
+
+
+            if ($result) {
+
+                $response['error'] = false;
+                $response['message'] = 'Profile Updated successfully';
+
+            } else {
+
+                $response['error'] = true;
+                $response['message'] = 'Oops!! Something went wrong';
+            }
+            break;
+
+
+        /*----------------------------------------------- Update Profile Image ---------------------------------------------------*/
+
+
+        case 'update_profile_image':
+
+            isTheseParametersAvailable(array('cust_id', 'profile_image'));
+
+            $db = new DbOperation();
+
+
+            $result = $db->updateProfileImage(
+                $_POST['cust_id'],
+                $_POST['profile_image']
+            );
+
+
+            if ($result) {
+
+                $response['error'] = false;
+                $response['message'] = 'Profile Image Updated successfully';
+
+            } else {
+
+                $response['error'] = true;
+                $response['message'] = 'Oops!! Something went wrong';
+            }
+            break;
+
+
+        /*----------------------------------------------- Change Password---------------------------------------------------*/
+
+
+        case 'change_password':
+
+            isTheseParametersAvailable(array('old', 'newpwd', 'cust_id'));
+            $db = new DbOperation();
+            $result = $db->ChangePassword($_POST['old'], $_POST['newpwd'], $_POST['cust_id']);
+
+
+            if ($result) {
+
+                $response['error'] = false;
+                $response['message'] = 'Password Updated successfully';
+
+            } else {
+
+                $response['error'] = true;
+                $response['message'] = 'Old Password is wrong';
+            }
+            break;
 
         /*----------------------------------------------- GET Restaurant List---------------------------------------------------*/
 

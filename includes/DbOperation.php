@@ -145,6 +145,9 @@ class DbOperation
 
     function cust_insert($name, $email, $password, $contact, $address)
     {
+
+        $password = base64_encode($password);
+
         // $created = date('Y-m-d H:i:s');
         $q = "select * from `customer_registration` where cust_email='$email' or cust_contact='$contact'";
         $data = mysqli_query($this->con, $q);
@@ -193,14 +196,18 @@ class DbOperation
     function getRestaurantList($cust_id)
     {
 
+        include_once '../Helpers/MyStatusHelper.php';
+
+        $approved = MyStatusHelper::status['approved'];
+
         if ($this->isBookingAvailable($cust_id)) {
 
             $mData = implode(',', $this->getRestaurantListByML($cust_id));
-            $stmt = "select * from `restaurant_registration` ORDER BY FIND_IN_SET(res_id, '$mData') DESC";
+            $stmt = "select * from `restaurant_registration` where status = '$approved' ORDER BY FIND_IN_SET(res_id, '$mData') DESC";
 
         } else {
 
-            $stmt = "select * from `restaurant_registration`";
+            $stmt = "select * from `restaurant_registration` where status = '$approved'";
         }
 
 
@@ -381,17 +388,8 @@ class DbOperation
 
         $user = array();
 
-        while ($rs = mysqli_fetch_assoc($data)) {
-
-
-            $user['id'] = $rs['cust_id'];
-            $user['name'] = $rs['cust_name'];
-            $user['email'] = $rs['cust_email'];
-            $user['contact'] = $rs['cust_contact'];
-            $user['address'] = $rs['cust_address'];
-            $user['created'] = $rs['registration_time'];
-
-
+        while ($rs = $data->fetch_object()) {
+            $user = $rs;
         }
         return $user;
     }
@@ -416,6 +414,90 @@ class DbOperation
         return $user;
     }
 
+
+    /*----------------------------------------------- User Profile ---------------------------------------------------------------*/
+
+
+    function getUserProfile($custId)
+    {
+        $stmt = "select * from `customer_registration` where cust_id = $custId";
+        $data = mysqli_query($this->con, $stmt);
+        $user = [];
+
+        while ($rs = $data->fetch_object()) {
+            $user = $rs;
+        }
+        return $user;
+    }
+
+
+    /*-----------------------------------------------Edit User Profile ---------------------------------------------------------------*/
+
+
+    function editUserProfile($custId, $name, $address)
+    {
+        $stmt = "UPDATE customer_registration SET cust_name = '$name',cust_address='$address' WHERE cust_id = $custId";
+        return mysqli_query($this->con, $stmt);
+
+    }
+
+
+    /*-----------------------------------------------Edit Profile Image ---------------------------------------------------------------*/
+
+
+    function updateProfileImage($custId, $profile)
+    {
+
+        $random = substr(md5(mt_rand()), 0, 7);
+
+        $img_name = $random . ".jpg";
+        $insertion_path = "../profile/" . $img_name;
+
+        file_put_contents($insertion_path, base64_decode($profile));
+
+
+        $stmt = "UPDATE customer_registration SET cust_image = '$img_name' WHERE cust_id = $custId";
+        return mysqli_query($this->con, $stmt);
+
+    }
+
+
+    /*----------------------------------------------- Change Password---------------------------------------------------*/
+
+
+    function ChangePassword($old, $new, $custId)
+    {
+
+        $old = base64_encode($old);
+        $new = base64_encode($new);
+
+        $sql = "select cust_id from customer_registration where cust_password='$old'";
+        $stmt = mysqli_query($this->con, $sql);
+
+        $num = mysqli_num_rows($stmt);
+
+
+        if ($num > 0) {
+
+            $sql = "UPDATE customer_registration SET cust_password = '$new' WHERE cust_id = $custId";
+            $this->con->query($sql);
+
+
+            return true;
+        } else {
+
+            return false;
+        }
+
+
+    }
+
+    /*
+    * The read operation
+    * When this method is called it is returning all the existing record of the database
+    */
+
+
     /*------------------------------------------------------------------------------------------------------------------------*/
 
 
@@ -437,6 +519,8 @@ class DbOperation
 
     function Login($email, $password)
     {
+        $password = base64_encode($password);
+
         $sql = "select * from `customer_registration` where cust_email = '$email' and cust_password= '$password'";
         $stmt = mysqli_query($this->con, $sql);
         $num = mysqli_num_rows($stmt);

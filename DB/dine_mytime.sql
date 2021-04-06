@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 24, 2021 at 11:23 AM
+-- Generation Time: Apr 06, 2021 at 08:49 AM
 -- Server version: 10.4.17-MariaDB
 -- PHP Version: 7.4.13
 
@@ -56,6 +56,7 @@ CREATE TABLE `customer_registration` (
   `cust_name` varchar(50) NOT NULL,
   `cust_email` varchar(30) NOT NULL,
   `cust_password` varchar(15) NOT NULL,
+  `cust_image` varchar(100) DEFAULT NULL,
   `cust_contact` bigint(10) NOT NULL,
   `cust_address` longtext NOT NULL,
   `registration_time` timestamp NOT NULL DEFAULT current_timestamp()
@@ -65,16 +66,16 @@ CREATE TABLE `customer_registration` (
 -- Dumping data for table `customer_registration`
 --
 
-INSERT INTO `customer_registration` (`cust_id`, `cust_name`, `cust_email`, `cust_password`, `cust_contact`, `cust_address`, `registration_time`) VALUES
-(1, 'Dhruv', 'dhruv@gmail.com', 'dhruv', 7574949277, 'nariyapada, petlad', '2020-12-17 04:10:01'),
-(2, 'Avani', 'avani@gmail.com', 'avani', 7574949278, 'manjalpur', '2020-12-17 04:10:01'),
-(9, 'rohit', 'rohit@gmail.com', 'cm9oaXQ=', 7864654684, 'fatehgaunj', '2020-12-18 04:54:12'),
-(12, 'rohit4', 'rohit12@gmail.com', 'cm9oaXQ0MQ==', 7864654689, 'fatehgaunj', '2020-12-18 14:32:57'),
-(13, 'rohit5', 'rohit123@gmail.com', 'cm9oaXQ0MTI=', 7864654690, 'fatehgaunj', '2020-12-31 06:21:40'),
-(14, 'hello', 'hello@gmail.com', 'aGVsbG8=', 7576498545, 'anand', '2020-12-31 12:33:30'),
-(15, 'hello1', 'hello1@gmail.com', 'aGVsbG8x', 7886487675, 'manjalpur', '2020-12-31 13:06:09'),
-(16, 'hello3', 'hello3@gmail.com', 'aGVsbG8z', 7546598645, 'alkapuri', '2020-12-31 13:56:02'),
-(17, 'b', 'b', 'Yg==', 1234567890, 'address', '2021-03-23 07:34:25');
+INSERT INTO `customer_registration` (`cust_id`, `cust_name`, `cust_email`, `cust_password`, `cust_image`, `cust_contact`, `cust_address`, `registration_time`) VALUES
+(1, 'Dhruv', 'dhruv@gmail.com', 'dhruv', NULL, 7574949277, 'nariyapada, petlad', '2020-12-17 04:10:01'),
+(2, 'Avani', 'avani@gmail.com', 'avani', NULL, 7574949278, 'manjalpur', '2020-12-17 04:10:01'),
+(9, 'rohit', 'rohit@gmail.com', 'cm9oaXQ=', NULL, 7864654684, 'fatehgaunj', '2020-12-18 04:54:12'),
+(12, 'rohit4', 'rohit12@gmail.com', 'cm9oaXQ0MQ==', NULL, 7864654689, 'fatehgaunj', '2020-12-18 14:32:57'),
+(13, 'rohit5', 'rohit123@gmail.com', 'cm9oaXQ0MTI=', NULL, 7864654690, 'fatehgaunj', '2020-12-31 06:21:40'),
+(14, 'hello', 'hello@gmail.com', 'aGVsbG8=', NULL, 7576498545, 'anand', '2020-12-31 12:33:30'),
+(15, 'hello1', 'hello1@gmail.com', 'aGVsbG8x', NULL, 7886487675, 'manjalpur', '2020-12-31 13:06:09'),
+(16, 'hello3', 'hello3@gmail.com', 'aGVsbG8z', NULL, 7546598645, 'alkapuri', '2020-12-31 13:56:02'),
+(17, 'Cool Customer Edited', 'b', 'Yg==', '1da5c9d.jpg', 1234567890, 'Address Edited', '2021-03-23 07:34:25');
 
 -- --------------------------------------------------------
 
@@ -195,7 +196,8 @@ INSERT INTO `my_order` (`order_id`, `res_id`, `table_id`, `menu`, `cust_id`, `am
 (15, 1, 1, 'Paneer - 3, Paw Bhaji', 17, 1450, 300, 0, '2021-03-24 09:05:00', '2021-03-23 10:28:29'),
 (16, 1, 2, 'one, two', 1, 100, 10, 0, '2021-03-24 09:16:19', '2021-03-23 10:50:19'),
 (23, 1, 1, 'Paneer - 3, Pani Poori, Paw Bhaji', 17, 1950, 10, 0, '2021-03-24 07:00:00', '2021-03-24 10:08:10'),
-(24, 1, 1, 'one, two', 1, 100, 10, 0, '2021-03-24 13:25:00', '2021-03-24 10:13:27');
+(24, 1, 1, 'one, two', 1, 100, 10, 0, '2021-03-30 13:25:00', '2021-03-24 10:13:27'),
+(25, 1, 2, 'Paw Bhaji', 17, 450, 0, 1, '2021-04-03 05:55:00', '2021-04-03 07:16:37');
 
 -- --------------------------------------------------------
 
@@ -242,7 +244,7 @@ CREATE TABLE `restaurant_registration` (
 --
 
 INSERT INTO `restaurant_registration` (`res_id`, `res_name`, `res_email`, `res_password`, `res_contact`, `res_address`, `registration_status`, `res_image`, `seat_image`, `status`, `registration_time`) VALUES
-(1, 'Hotel Atithi', 'rb', 'rb', 7864654690, 'Petlad', 0, 'image.jpg', '1_seat_map.jpg', 'Approved', '2021-01-02 11:23:37'),
+(1, 'Hotel Atithi', 'rb', 'rb', 7864654690, '24-25, Hotel Atithi, Petlad', 0, 'image.jpg', '2f8cc782de00e5e3cbb491d98a7a9e86_seat_map.jpg', 'Approved', '2021-01-02 11:23:37'),
 (2, 'Hotel Saffron', 'saffron@gmail.com', 'c2FmZnJvbg==', 7864654691, 'Petlad', 0, 'image1.jpg', NULL, 'Approved', '2021-01-02 11:24:41'),
 (3, 'ABC', 'ab2', 'rb2', 1234567890, 'ABC', 0, '95502ebb7eea5108dc43ed65970151a8.jpg', NULL, 'Approved', '2021-01-06 06:58:49'),
 (6, 'N', 'n', 'n', 11, 'n', 0, 'f4d7517b4690240c7d53c301f1276142.jpg', NULL, 'Pending', '2021-03-23 07:52:47');
@@ -349,7 +351,7 @@ ALTER TABLE `menu`
 -- AUTO_INCREMENT for table `my_order`
 --
 ALTER TABLE `my_order`
-  MODIFY `order_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `order_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `my_table`

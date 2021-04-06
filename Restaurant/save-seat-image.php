@@ -24,7 +24,7 @@ if (isset($_POST['submit'])) {
 
         $filename = $_FILES["file"]["name"];
         $extension = pathinfo($filename, PATHINFO_EXTENSION);
-        $upload = $res_id . "_seat_map" . ".jpg";
+        $upload = md5(date('d-m-Y H:i:s')) . "_seat_map" . ".jpg";
         $file_path = $host . $upload;
 
 
